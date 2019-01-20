@@ -10,17 +10,12 @@ import (
 	"github.com/YuShuanHsieh/trello-transform/pkg"
 )
 
-type BriefFn func(*Transform, interface{}, *models.Card) interface{}
-
-type BriefFnConfig struct {
-	key string
-	fn  BriefFn
-}
+type ResultConfigFn func(*Transform, interface{}, *models.Card) interface{}
 
 type Transform struct {
 	table      models.TrelloTable
 	labelsMap  map[string]*models.Label
-	briefFnMap map[string]BriefFn
+	briefFnMap map[string]ResultConfigFn
 	result     map[string]interface{}
 }
 
@@ -39,7 +34,7 @@ func New(rawData []byte) *Transform {
 
 func (t *Transform) initTransform() {
 	t.labelsMap = make(map[string]*models.Label)
-	t.briefFnMap = make(map[string]BriefFn)
+	t.briefFnMap = make(map[string]ResultConfigFn)
 	t.result = make(map[string]interface{})
 }
 
@@ -49,7 +44,7 @@ func (t *Transform) allocateLabelsMap() {
 	}
 }
 
-func (t *Transform) ResultConfig(key string, fn BriefFn) {
+func (t *Transform) ResultConfig(key string, fn ResultConfigFn) {
 	t.briefFnMap[key] = fn
 }
 
@@ -100,7 +95,7 @@ func CountLabelsFn(tr *Transform, preValue interface{}, c *models.Card) interfac
 	return labelsMap
 }
 
-func DefaultBriefFn(tr *Transform, preValue interface{}, c *models.Card) interface{} {
+func CardBriefFn(tr *Transform, preValue interface{}, c *models.Card) interface{} {
 	if c.Due == "" || c.Name == "" {
 		return nil
 	}
