@@ -55,7 +55,7 @@ func (t *Transform) allocateListsMap() {
 	}
 }
 
-func (t *Transform) FilterByList(l *models.List) SeletorFn {
+func (t *Transform) SelectByList(l *models.List) SeletorFn {
 	if l == nil {
 		return nil
 	}
@@ -75,7 +75,7 @@ func (t *Transform) FilterByList(l *models.List) SeletorFn {
 	}
 }
 
-func (t *Transform) FilterConfig(fn SeletorFn) {
+func (t *Transform) SelectorConfig(fn SeletorFn) {
 	t.selectorChan = append(t.selectorChan, fn)
 }
 
@@ -86,7 +86,7 @@ func (t *Transform) ResultConfig(key string, fn ResultConfigFn) {
 func (t *Transform) TransformFromTrello() {
 	skipFilter := len(t.selectorChan) == 0
 	for _, card := range t.table.Cards {
-		if !skipFilter && !t.IsFilterCard(&card) {
+		if !skipFilter && !t.IsSelectCard(&card) {
 			continue
 		}
 		for key, fn := range t.briefFnMap {
@@ -95,7 +95,7 @@ func (t *Transform) TransformFromTrello() {
 	}
 }
 
-func (t *Transform) IsFilterCard(c *models.Card) bool {
+func (t *Transform) IsSelectCard(c *models.Card) bool {
 	for _, fn := range t.selectorChan {
 		filtered := fn(c)
 		if filtered {

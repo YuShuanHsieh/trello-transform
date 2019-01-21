@@ -4,6 +4,15 @@
 
 Small project for transform json file exported from trello to customized output.
 
+## Why to use
+When you create lots of cards on trello board and want to group important information from them.
+
+## How to use
+
+`go run main.go -p ./trello.json`
+
+- `-p`: the path of your json file
+
 ## How it work
 
 1. Export `json file` from trello board
@@ -45,3 +54,10 @@ func CountLabelsFn(tr *Transform, preValue interface{}, c *models.Card) interfac
 	return labelsMap
 }
 ```
+
+## Config selector function
+```go
+// Cards with target list name will be transformed.
+// Add this line before call `tr.TransformFromTrello()`
+tr.SelectorConfig(tr.SelectByList(&models.List{Name: "2019/01"}))
+``` 

@@ -9,7 +9,7 @@ import (
 	"github.com/YuShuanHsieh/trello-transform/services"
 )
 
-func Run() {
+func Run() map[string]interface{} {
 	filePath := flag.String("p", "trello.json", "The path of exported json file from Trello")
 	if *filePath == "" {
 		log.Panicln("The file path cannot be empty")
@@ -23,12 +23,12 @@ func Run() {
 	}
 
 	tr := transform.New(content)
-	tr.FilterConfig(tr.FilterByList(&models.List{
+	tr.SelectorConfig(tr.SelectByList(&models.List{
 		Name: "2019/01"}))
 	tr.ResultConfig("list", transform.CardBriefFn)
 	tr.ResultConfig("reference", transform.ExtractReferenceFn)
 	tr.ResultConfig("label", transform.CountLabelsFn)
 	tr.TransformFromTrello()
 
-	log.Printf("%+v", tr.GetAllResult())
+	return tr.GetAllResult()
 }

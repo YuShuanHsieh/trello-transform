@@ -1,9 +1,12 @@
 package main
 
 import (
+	"log"
+
 	"github.com/YuShuanHsieh/trello-transform/cmd"
 )
 
 func main() {
-	cmd.Run()
+	result := cmd.Run()
+	log.Printf("%+v", result)
 }
