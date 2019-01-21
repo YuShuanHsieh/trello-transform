@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 
+	"github.com/YuShuanHsieh/trello-transform/models"
 	"github.com/YuShuanHsieh/trello-transform/services"
 )
 
@@ -22,6 +23,8 @@ func Run() {
 	}
 
 	tr := transform.New(content)
+	tr.FilterConfig(tr.FilterByList(&models.List{
+		Name: "2019/01"}))
 	tr.ResultConfig("list", transform.CardBriefFn)
 	tr.ResultConfig("reference", transform.ExtractReferenceFn)
 	tr.ResultConfig("label", transform.CountLabelsFn)

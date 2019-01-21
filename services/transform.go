@@ -11,11 +11,14 @@ import (
 )
 
 type ResultConfigFn func(*Transform, interface{}, *models.Card) interface{}
+type FilterFn func(*models.Card) bool
 
 type Transform struct {
 	table      models.TrelloTable
 	labelsMap  map[string]*models.Label
+	listsMap   map[string]*models.List
 	briefFnMap map[string]ResultConfigFn
+	filterChan []FilterFn
 	result     map[string]interface{}
 }
 
@@ -29,10 +32,12 @@ func New(rawData []byte) *Transform {
 		return nil
 	}
 	t.allocateLabelsMap()
+	t.allocateListsMap()
 	return &t
 }
 
 func (t *Transform) initTransform() {
+	t.listsMap = make(map[string]*models.List)
 	t.labelsMap = make(map[string]*models.Label)
 	t.briefFnMap = make(map[string]ResultConfigFn)
 	t.result = make(map[string]interface{})
@@ -44,16 +49,60 @@ func (t *Transform) allocateLabelsMap() {
 	}
 }
 
+func (t *Transform) allocateListsMap() {
+	for i, v := range t.table.Lists {
+		t.listsMap[v.ID] = &t.table.Lists[i]
+	}
+}
+
+func (t *Transform) FilterByList(l *models.List) FilterFn {
+	if l == nil {
+		return nil
+	}
+	return func(c *models.Card) bool {
+		value, ok := t.listsMap[c.IDList]
+		match := true
+		if ok {
+			match = match && l.Closed == value.Closed
+		}
+		if l.ID != "" {
+			match = match && l.ID == c.IDList
+		}
+		if l.Name != "" && ok {
+			match = match && l.Name == value.Name
+		}
+		return match
+	}
+}
+
+func (t *Transform) FilterConfig(fn FilterFn) {
+	t.filterChan = append(t.filterChan, fn)
+}
+
 func (t *Transform) ResultConfig(key string, fn ResultConfigFn) {
 	t.briefFnMap[key] = fn
 }
 
 func (t *Transform) TransformFromTrello() {
+	skipFilter := len(t.filterChan) == 0
 	for _, card := range t.table.Cards {
+		if !skipFilter && !t.IsFilterCard(&card) {
+			continue
+		}
 		for key, fn := range t.briefFnMap {
 			t.result[key] = fn(t, t.result[key], &card)
 		}
 	}
+}
+
+func (t *Transform) IsFilterCard(c *models.Card) bool {
+	for _, fn := range t.filterChan {
+		filtered := fn(c)
+		if filtered {
+			return true
+		}
+	}
+	return false
 }
 
 func (t *Transform) GetAllResult() map[string]interface{} {
