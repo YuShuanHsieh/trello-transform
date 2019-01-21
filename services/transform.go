@@ -11,15 +11,15 @@ import (
 )
 
 type ResultConfigFn func(*Transform, interface{}, *models.Card) interface{}
-type FilterFn func(*models.Card) bool
+type SeletorFn func(*models.Card) bool
 
 type Transform struct {
-	table      models.TrelloTable
-	labelsMap  map[string]*models.Label
-	listsMap   map[string]*models.List
-	briefFnMap map[string]ResultConfigFn
-	filterChan []FilterFn
-	result     map[string]interface{}
+	table        models.TrelloTable
+	labelsMap    map[string]*models.Label
+	listsMap     map[string]*models.List
+	briefFnMap   map[string]ResultConfigFn
+	selectorChan []SeletorFn
+	result       map[string]interface{}
 }
 
 func New(rawData []byte) *Transform {
@@ -55,7 +55,7 @@ func (t *Transform) allocateListsMap() {
 	}
 }
 
-func (t *Transform) FilterByList(l *models.List) FilterFn {
+func (t *Transform) FilterByList(l *models.List) SeletorFn {
 	if l == nil {
 		return nil
 	}
@@ -75,8 +75,8 @@ func (t *Transform) FilterByList(l *models.List) FilterFn {
 	}
 }
 
-func (t *Transform) FilterConfig(fn FilterFn) {
-	t.filterChan = append(t.filterChan, fn)
+func (t *Transform) FilterConfig(fn SeletorFn) {
+	t.selectorChan = append(t.selectorChan, fn)
 }
 
 func (t *Transform) ResultConfig(key string, fn ResultConfigFn) {
@@ -84,7 +84,7 @@ func (t *Transform) ResultConfig(key string, fn ResultConfigFn) {
 }
 
 func (t *Transform) TransformFromTrello() {
-	skipFilter := len(t.filterChan) == 0
+	skipFilter := len(t.selectorChan) == 0
 	for _, card := range t.table.Cards {
 		if !skipFilter && !t.IsFilterCard(&card) {
 			continue
@@ -96,7 +96,7 @@ func (t *Transform) TransformFromTrello() {
 }
 
 func (t *Transform) IsFilterCard(c *models.Card) bool {
-	for _, fn := range t.filterChan {
+	for _, fn := range t.selectorChan {
 		filtered := fn(c)
 		if filtered {
 			return true
