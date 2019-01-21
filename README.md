@@ -26,12 +26,23 @@ When you create lots of cards on trello board and want to group important inform
 ```go
 // content is []byte type from json file
 tr := transform.New(content)
+
+// Now selector function only support `SelectByList`
+tr.SelectorConfig(tr.SelectByList(&models.List{Name: "2019/01"}))
+
+// `CardBriefFn`, `ExtractReferenceFn`, `CountLabelsFn` are default fn for service. Or you can create your result config function
 tr.ResultConfig("list", transform.CardBriefFn)
 tr.ResultConfig("reference", transform.ExtractReferenceFn)
 tr.ResultConfig("label", transform.CountLabelsFn)
+
+// Call this function to transform cards
 tr.TransformFromTrello()
 
-log.Printf("%+v", tr.GetAllResult())
+json, err := json.Marshal(tr.GetAllResult())
+if err != nil {
+	log.Printf(err.Error())
+}
+log.Printf("%s", json)
 ```
 
 ## Create a customized `ResultConfig` function
