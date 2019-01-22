@@ -4,22 +4,16 @@
 
 Small project for transform json file exported from trello to customized output.
 
-## Why to use
-When you create lots of cards on trello board and want to group important information from them.
+## Why use it
 
-## How to use
+1. Sometime You just need few data from trello cards. Use Trello API to retrieve data is too heavy work to you.
+2. When you create lots of cards on trello board and want to group parts of information from them.
 
-`go run main.go -p ./trello.json`
+## How to use / test
 
-- `-p`: the path of your json file
-
-## How it work
-
-1. Export `json file` from trello board
-2. Use `json file` as input
-3. Define your ResultConfigs
-4. Run transform function
-5. Call the result function get get all or single result
+- export json file from your card
+- run `go run main.go` to start the web server
+- run `go run cmd/cmd.go <your trello json file> | json_pp`
 
 ### Example
 
@@ -28,15 +22,15 @@ When you create lots of cards on trello board and want to group important inform
 tr := transform.New(content)
 
 // Now selector function only support `SelectByList`
-tr.SelectorConfig(tr.SelectByList(&models.List{Name: "2019/01"}))
+tr.Selector(tr.SelectByList(&models.List{Name: "2019/01"}))
 
-// `CardBriefFn`, `ExtractReferenceFn`, `CountLabelsFn` are default fn for service. Or you can create your result config function
-tr.ResultConfig("list", transform.CardBriefFn)
-tr.ResultConfig("reference", transform.ExtractReferenceFn)
-tr.ResultConfig("label", transform.CountLabelsFn)
+// `CardBriefFunc`, `ExtractReferenceFunc`, `CountLabelsFunc` are default fn for service. Or you can create your result config function
+tr.Use("list", transform.CardBriefFunc)
+tr.Use("reference", transform.ExtractReferenceFunc)
+tr.Use("label", transform.CountLabelsFunc)
 
 // Call this function to transform cards
-tr.TransformFromTrello()
+tr.Exec()
 
 json, err := json.Marshal(tr.GetAllResult())
 if err != nil {
@@ -67,8 +61,9 @@ func CountLabelsFn(tr *Transform, preValue interface{}, c *models.Card) interfac
 ```
 
 ## Config selector function
+
 ```go
 // Cards with target list name will be transformed.
 // Add this line before call `tr.TransformFromTrello()`
-tr.SelectorConfig(tr.SelectByList(&models.List{Name: "2019/01"}))
+tr.Selector(tr.SelectByList(&models.List{Name: "2019/01"}))
 ``` 
