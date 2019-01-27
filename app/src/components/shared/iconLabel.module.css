@@ -1,0 +1,10 @@
+.iconLabelContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0 10px;
+}
+
+.iconLabel {
+  padding: 5px 10px;
+}

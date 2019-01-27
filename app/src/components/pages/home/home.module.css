@@ -1,0 +1,17 @@
+.homeContainer {
+  display: flex;
+  justify-content: center;
+  padding-top: 30vh;
+}
+
+h1 {
+  font-size: 60px;
+  color: #4a4b46;
+}
+
+.uploadFile {
+  padding-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}

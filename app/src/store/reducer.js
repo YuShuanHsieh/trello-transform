@@ -1,10 +1,6 @@
 import * as type from './types';
 
-const initialState = {
-  label: {},
-  list: [],
-  reference: []
-}
+const initialState = {}
 
 export function transform(state = initialState, action) {
   switch(action.type) {

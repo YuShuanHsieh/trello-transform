@@ -1,35 +1,26 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux';
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom';
 
-import { APPList } from './components/list';
-import { transformData } from './store/actions';
-import { isValidFileType } from './utilities/validators';
+import { menu } from './configuration';
+import { Header } from './components/app/header/header';
+import { Home } from './components/pages/home/home';
+import { Result } from './components/pages/result/result';
 import './App.css';
 
-class App extends Component {
-  fileRef = React.createRef()
-
-  changeFileHandler = () => {
-    if (!isValidFileType(this.fileRef.current.files, 'json')) return;
-    const formData = new FormData();
-    formData.append('file', this.fileRef.current.files[0])
-    this.props.transformData(formData);
-  }
-
-
-
+export class App extends Component {
+  
   render() {
     return (
-      <React.Fragment>
-        <input type="file" ref={this.fileRef} onChange={this.changeFileHandler}/>
-        <APPList list={this.props.list}/>
-      </React.Fragment>
+      <Router>
+        <React.Fragment>
+          <Header></Header>
+          <Switch>
+            <Route path={menu.home.path} component={Home} />
+            <Route path={menu.result.path} component={Result} />
+            <Route component={Home} />
+          </Switch>
+        </React.Fragment>
+      </Router>
     );
   }
 }
-
-const mapStateToProps = state => ({
-  list: state.list
-})
-
-export const AppContainer = connect(mapStateToProps, {transformData})(App)
