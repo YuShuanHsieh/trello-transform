@@ -1,28 +1,34 @@
-import React from "react";
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { Button } from '@material-ui/core';
 
 import { FileSelector } from '../../shared/fileSelector';
 import { transformData } from '../../../store/actions';
 
-import style  from './home.module.css';
+import style from './home.module.css';
 
 export class HomeComponent extends React.Component {
-  title = 'Trello Transform'
-  subTitle = 'Transform json file exported from trello to useful information'
-  typeArray = ['json', 'csv']
-
-  object = {
-    list: ['cherie', 'cherie2', 'cherie3'],
-    label: {
-      network: 2,
-      book: 3
-    },
-    test: 'test'
+  static propTypes = {
+    transformData: PropTypes.func.isRequired,
   }
 
-  fileUploadHandler = (file) => {
-    this.props.transformData(file)
+  state = {
+    file: '',
+  }
+
+  title = 'Trello Transform';
+
+  subTitle = 'Transform json file exported from trello to useful information';
+
+  validTypes = ['json'];
+
+  handleUploadFile = (uploadFile) => {
+    this.setState({ file: uploadFile });
+  }
+
+  handleSubmit = () => {
+    this.props.transformData(this.state.file);
   }
 
   render() {
@@ -32,14 +38,14 @@ export class HomeComponent extends React.Component {
           <h1>{this.title}</h1>
           <span>{this.subTitle}</span>
           <div className={style.uploadFile}>
-            <FileSelector uploadFile={this.fileUploadHandler} typeArray={this.typeArray}></FileSelector>
-            <div style={{flex:1}}></div>
-            <Button variant="outlined">SUBMIT</Button>
+            <FileSelector uploadFile={this.handleUploadFile} validTypes={this.validTypes} />
+            <div style={{ flex: 1 }} />
+            <Button variant="outlined" onClick={this.handleSubmit}>SUBMIT</Button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 }
 
-export const Home = connect(null, {transformData})(HomeComponent)
+export const Home = connect(null, { transformData })(HomeComponent);

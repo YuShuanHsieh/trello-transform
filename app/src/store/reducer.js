@@ -1,12 +1,12 @@
 import * as type from './types';
 
-const initialState = {}
+const initialState = {};
 
 export function transform(state = initialState, action) {
-  switch(action.type) {
+  switch (action.type) {
     case type.TRANSFORM_DATA_DONE:
-      return {...state, ...action.payload};
+      return ({ ...state, ...action.payload });
     default:
       return state;
   }
-} 
+}

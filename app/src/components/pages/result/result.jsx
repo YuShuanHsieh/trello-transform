@@ -1,29 +1,31 @@
-import React from "react";
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 
 import { ObjectView } from '../../shared/objectView';
 import style from './result.module.css';
 
-class ResultComponent extends React.Component {
-  render() {
-    if(Object.keys(this.props.result).length === 0) {
-      return (
-        <div className={style.preparing}>
-          <p>Please upload your file first</p>
-        </div>
-      )
-    }
+function ResultComponent({ result }) {
+  if (Object.keys(result).length === 0) {
     return (
-      <ObjectView object={this.props.result} property={'Result'}></ObjectView>
-    )
+      <div className={style.preparing}>
+        <p>Please upload your file first</p>
+      </div>
+    );
   }
+  return (
+    <ObjectView object={result} property="Result" />
+  );
 }
+
+ResultComponent.propTypes = {
+  result: PropTypes.objectOf(PropTypes.object).isRequired,
+};
 
 function mapStateTpProps(state) {
   return {
-    result: state
-  }
+    result: state,
+  };
 }
 
-export const Result = connect(mapStateTpProps)(ResultComponent)
-
+export const Result = connect(mapStateTpProps)(ResultComponent);

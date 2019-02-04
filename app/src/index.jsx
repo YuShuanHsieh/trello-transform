@@ -10,10 +10,11 @@ const store = configureStore();
 
 ReactDOM.render(
   <Provider store={store}>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css"></link>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.7.0/animate.min.css" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
     <App />
   </Provider>,
-  document.getElementById('root')
+  // eslint-disable-next-line no-undef
+  document.getElementById('root'),
 );

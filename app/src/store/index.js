@@ -1,3 +1,5 @@
+/* eslint-disable no-undef */
+/* eslint-disable no-underscore-dangle */
 import { createStore, compose, applyMiddleware } from 'redux';
 import { createEpicMiddleware } from 'redux-observable';
 
@@ -11,8 +13,8 @@ export function configureStore() {
   const store = createStore(
     transform,
     composeEnhancers(
-      applyMiddleware(epicMiddleware)
-    )
+      applyMiddleware(epicMiddleware),
+    ),
   );
 
   epicMiddleware.run(transformEpic);
