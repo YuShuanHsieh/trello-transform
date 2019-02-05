@@ -1,8 +1,8 @@
 export const routePath = {
   home: ['/home', '/'],
   result: '/result',
-  analysis: '/analysis'
-}
+  analysis: '/analysis',
+};
 
 export const menu = {
   home: {

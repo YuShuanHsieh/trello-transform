@@ -1,37 +1,46 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Button } from '@material-ui/core';
-import { ExpandMore, ExpandLess } from '@material-ui/icons';
 
+import { ExpandButton } from './expandButton';
 import { ArrayView } from './arrayView';
 
 export class ObjectView extends React.Component {
   static propTypes = {
-    object: PropTypes.oneOf([PropTypes.object, PropTypes.string, PropTypes.number]).isRequired,
-    property: PropTypes.oneOf([PropTypes.string, PropTypes.number]).isRequired,
+    object: PropTypes.oneOfType([PropTypes.object, PropTypes.string, PropTypes.number]).isRequired,
+    property: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
+    hideProperty: PropTypes.bool,
   }
 
+  static defaultProps = {
+    hideProperty: false,
+  }
+
+  style = { color: '#6c6c6c' }
 
   state = {
     expand: true,
   }
 
-  expandHandler = () => {
-    this.setState(pre => ({
-      expand: !pre.expand,
-    }));
+  space = { paddingLeft: '10px' };
+
+  handleToggleExpand = (value) => {
+    this.setState({
+      expand: value,
+    });
   }
 
   render() {
     const view = [];
     let mIndex = 0;
-    const { object, property } = this.props;
+    const { object, property, hideProperty } = this.props;
     if (typeof object === 'object') {
       view.push(
-        <Button key={`nodeId-${mIndex += 1}`} onClick={this.expandHandler}>
-          {this.state.expand ? <ExpandLess /> : <ExpandMore />}
-          {property}
-        </Button>,
+        <ExpandButton
+          key={`nodeId-${mIndex += 1}`}
+          label={property}
+          expand={this.state.expand}
+          onToggle={this.handleToggleExpand}
+        />,
       );
 
       if (!this.state.expand) {
@@ -40,17 +49,26 @@ export class ObjectView extends React.Component {
 
       Object.keys(object).forEach((value) => {
         if (Array.isArray(object[value])) {
-          view.push(<ArrayView key={`nodeId-${mIndex += 1}`} array={object[value]} />);
+          view.push(
+            <div style={this.space} key={`nodeId-${mIndex += 1}`}>
+              <ArrayView key={`nodeId-${mIndex += 1}`} property={value} array={object[value]} />
+            </div>,
+          );
         } else {
-          view.push(<ObjectView key={`nodeId-${mIndex += 1}`} property={value} object={object[value]} />);
+          view.push(
+            <div style={this.space} key={`nodeId-${mIndex += 1}`}>
+              <ObjectView
+                property={value}
+                object={object[value]}
+              />
+            </div>,
+          );
         }
       });
     } else {
       view.push(
-        <p key={`nodeId-${mIndex += 1}`}>
-          {property}
-          :
-          {object}
+        <p style={this.style} key={`nodeId-${mIndex += 1}`}>
+          {hideProperty ? object : `${property} : ${object}`}
         </p>,
       );
     }

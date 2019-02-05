@@ -5,26 +5,33 @@ import { connect } from 'react-redux';
 import { ObjectView } from '../../shared/objectView';
 import style from './result.module.css';
 
-function ResultComponent({ result }) {
-  if (Object.keys(result).length === 0) {
+function ResultComponent({ uploaded, result }) {
+  if (!uploaded && Object.keys(result).length === 0) {
     return (
       <div className={style.preparing}>
-        <p>Please upload your file first</p>
+        <span className={style.border}>Please upload your file first</span>
       </div>
     );
   }
   return (
-    <ObjectView object={result} property="Result" />
+    <div className={style.resultContainer}>
+      <div className={style.result}>
+        <h2>Result</h2>
+        <ObjectView object={result} property="Result" />
+      </div>
+    </div>
   );
 }
 
 ResultComponent.propTypes = {
-  result: PropTypes.objectOf(PropTypes.object).isRequired,
+  uploaded: PropTypes.bool.isRequired,
+  result: PropTypes.oneOfType([PropTypes.object, PropTypes.array]).isRequired,
 };
 
 function mapStateTpProps(state) {
   return {
-    result: state,
+    uploaded: state.uploaded,
+    result: state.result,
   };
 }
 

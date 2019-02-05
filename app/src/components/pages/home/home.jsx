@@ -1,15 +1,19 @@
+/* eslint-disable react/forbid-prop-types */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { withRouter } from 'react-router-dom';
 import { Button } from '@material-ui/core';
 
 import { FileSelector } from '../../shared/fileSelector';
 import { transformData } from '../../../store/actions';
+import { routePath } from '../../../configuration';
 
 import style from './home.module.css';
 
 export class HomeComponent extends React.Component {
   static propTypes = {
+    history: PropTypes.object.isRequired,
     transformData: PropTypes.func.isRequired,
   }
 
@@ -28,7 +32,10 @@ export class HomeComponent extends React.Component {
   }
 
   handleSubmit = () => {
-    this.props.transformData(this.state.file);
+    if (this.state.file) {
+      this.props.transformData(this.state.file);
+      this.props.history.push(routePath.result);
+    }
   }
 
   render() {
@@ -40,7 +47,7 @@ export class HomeComponent extends React.Component {
           <div className={style.uploadFile}>
             <FileSelector uploadFile={this.handleUploadFile} validTypes={this.validTypes} />
             <div style={{ flex: 1 }} />
-            <Button variant="outlined" onClick={this.handleSubmit}>SUBMIT</Button>
+            <Button variant="outlined" disabled={!this.state.file} onClick={this.handleSubmit}>SUBMIT</Button>
           </div>
         </div>
       </div>
@@ -48,4 +55,4 @@ export class HomeComponent extends React.Component {
   }
 }
 
-export const Home = connect(null, { transformData })(HomeComponent);
+export const Home = withRouter(connect(null, { transformData })(HomeComponent));

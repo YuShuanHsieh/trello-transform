@@ -1,22 +1,45 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
+import { ExpandButton } from './expandButton';
 import { ObjectView } from './objectView';
 
-export function ArrayView({ array }) {
-  const items = array.map((value, index) => {
-    const id = `array-key-${index}`;
-    return (
-      <li key={id}>
-        <ObjectView property={id} object={value} />
-      </li>
-    );
-  });
+export class ArrayView extends React.Component {
+  static propTypes = {
+    array: PropTypes.arrayOf(PropTypes.oneOfType([PropTypes.object, PropTypes.string])).isRequired,
+    property: PropTypes.string.isRequired,
+  };
 
-  return (
-    <ul>{items}</ul>
-  );
+  state = {
+    expand: true,
+  }
+
+  handleToggleExpand = (value) => {
+    this.setState({
+      expand: value,
+    });
+  }
+
+  render() {
+    const items = this.props.array.map((value, index) => {
+      const id = `array-key-${index}`;
+      return (
+        <li key={id}>
+          <ObjectView hideProperty property={index} object={value} />
+        </li>
+      );
+    });
+    return (
+      <React.Fragment>
+        <ExpandButton
+          label={this.props.property}
+          expand={this.state.expand}
+          onToggle={this.handleToggleExpand}
+        />
+        {this.state.expand
+          ? <ul>{items}</ul>
+          : null }
+      </React.Fragment>
+    );
+  }
 }
-ArrayView.propTypes = {
-  array: PropTypes.arrayOf(PropTypes.object).isRequired,
-};
