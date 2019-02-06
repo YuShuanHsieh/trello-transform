@@ -3,7 +3,7 @@ all:
 
 ui: 
 	mkdir -p ui && \
-	cd app/ && yarn build && cp -r build/* ../ui
+	cd app/ && npm build && cp -r build/* ../ui
 
 core:
 	go build -o core main.go

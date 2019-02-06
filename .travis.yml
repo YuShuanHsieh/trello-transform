@@ -1,23 +1,15 @@
-matrix:
-  include:
-    - language: node_js
-      node_js: 
-        - "10"
-      before_install:
-        - cd app/
-      install:
-        - yarn
-      script:
-        - make ui
-
-    - language: go
-      go: 
-        - 1.11.x
-      install:
-        - go get ./..
-      script:
-        - make core
-        - make package
+language: go
+go: 
+  - 1.11.x
+before_install:
+  - nvm install 10.7.0
+  - export GO111MODULE=on
+install:
+  - go mod download
+  - cd app/
+  - npm install
+script:
+  - make
   
 notifications:
   email: false
