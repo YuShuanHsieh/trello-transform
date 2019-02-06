@@ -1,0 +1,25 @@
+matrix:
+  include:
+    - language: node_js
+      node_js: 
+        - "10"
+      before_install:
+        - cd app/
+      install:
+        - yarn
+      script:
+        - make ui
+
+    - language: go
+      go: 
+        - 1.11.x
+      install:
+        - go get ./..
+      script:
+        - make core
+        - make package
+  
+notifications:
+  email: false
+
+  
