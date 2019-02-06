@@ -6,9 +6,9 @@ before_install:
   - export GO111MODULE=on
 install:
   - go mod download
-  - ls && cd app/ && npm install
+  - cd app/ && npm install && cd ../
 script:
-  - ls && make
+  - make
   
 notifications:
   email: false
