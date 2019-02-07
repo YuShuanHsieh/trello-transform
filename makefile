@@ -2,12 +2,17 @@ all:
 	make ui && make core && make package
 
 ui: 
-	mkdir -p release/web && \
-	cd app/ && npm run build && cp -r build/* ../release/web
+	mkdir -p tmp/web && \
+	cd app/ && npm run build && cp -r build/* ../tmp/web
 
 core:
 	go build -o core main.go && \
-	cp core release/
+	cp core appspec.yml tmp/ && \
+	mkdir -p tmp/scripts && cp -r scripts/* tmp/scripts
 
 package:
-	cd release/ && tar -czvf app.tgz web/ core
+	mkdir -p release/ && cd tmp/ && \
+	tar -czvf app.tgz --exclude=./*.tgz . && \
+	mv app.tgz ../release/ && \
+	cd ../ && rm -r tmp/
+	
