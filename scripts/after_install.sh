@@ -1,3 +1,3 @@
 #!/bin/bash
 
-mv /home/app/* /var/www
+mv /home/app/core /home/app/web /var/www
