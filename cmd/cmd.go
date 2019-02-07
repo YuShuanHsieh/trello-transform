@@ -10,23 +10,40 @@ import (
 	"mime/multipart"
 	"net/http"
 	"os"
+
+	"github.com/YuShuanHsieh/trello-transform/server"
+	"github.com/YuShuanHsieh/trello-transform/utilities"
 )
 
 func main() {
-	filePath := flag.String("p", "trello.json", "The path of exported json file from Trello")
-	if *filePath == "" {
-		log.Panicln("The file path cannot be empty")
-	}
-
+	filePath := flag.String("p", "", "The path of exported json file from Trello")
+	stopSignal := flag.Bool("stop", false, "Stop Web Server")
 	flag.Parse()
-
-	req := createTransformRequest(*filePath)
-	res, err := http.DefaultClient.Do(req)
-	if err != nil {
-		log.Panicf("[Send request error] %s \n", err.Error())
+	if *filePath != "" {
+		req := createTransformRequest(*filePath)
+		res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			log.Panicf("[Send request error] %s \n", err.Error())
+		}
+		data, _ := ioutil.ReadAll(res.Body)
+		fmt.Printf("%s", data)
+		return
 	}
-	data, _ := ioutil.ReadAll(res.Body)
-	fmt.Printf("%s", data)
+	if *stopSignal {
+		req := createStopServerRequest()
+		http.DefaultClient.Do(req)
+		return
+	}
+}
+
+func createStopServerRequest() *http.Request {
+	port := utilities.GetPortNumber(server.DefaultPort)
+	url := fmt.Sprintf("http://localhost:%d/server/stop", port)
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		log.Panicf("[Cannot create a request] %s \n", err.Error())
+	}
+	return req
 }
 
 func createTransformRequest(filePath string) *http.Request {
@@ -43,7 +60,9 @@ func createTransformRequest(filePath string) *http.Request {
 	io.Copy(fw, file)
 	w.Close()
 
-	req, err := http.NewRequest("POST", "http://localhost:8181/transform", &buf)
+	port := utilities.GetPortNumber(server.DefaultPort)
+	url := fmt.Sprintf("http://localhost:%d/transform", port)
+	req, err := http.NewRequest("POST", url, &buf)
 	if err != nil {
 		log.Panicf("[Cannot create a request] %s \n", err.Error())
 	}
