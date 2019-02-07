@@ -1,4 +1,4 @@
 #!/bin/bash
 
 cd /var/www/
-./core &
+nohup ./core > /dev/null 2>&1 &
