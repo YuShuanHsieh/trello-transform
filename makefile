@@ -9,4 +9,4 @@ core:
 	go build -o core main.go
 
 package:
-	tar -czvf app.tar.gz ui/ core
+	tar -czvf app.tgz ui/ core

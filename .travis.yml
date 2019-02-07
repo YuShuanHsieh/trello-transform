@@ -1,27 +1,24 @@
 language: go
-go: 
-  - 1.11.x
+go:
+- 1.11.x
 before_install:
-  - nvm install 10.7.0
-  - export GO111MODULE=on
+- nvm install 10.7.0
+- export GO111MODULE=on
 install:
-  - go mod download
-  - cd app/ && npm install && cd ../
+- go mod download
+- cd app/ && npm install && cd ../
 script:
-  - make
-
+- make
 deploy:
   provider: codedeploy
   access_key_id: AKIAILZZNNW2UR7S46QQ
   secret_access_key:
-    secure: "gBg4nPtKnHViGvoODsCzPmadhnQ3XqItxKxXLOVlGJTARkh1t5xh+7VNvt1ahlhq7ZRT6DJY0qi9eaq1DbBGW4wppgu/JZjD6vcJfEv8Jr75EXn3X0YGrtQbRZWJPy8WetujqTaueKBlyZ9vgqtkT0K1KWxs7G9Uaf0BJR9mK2bZfApZGWz0qeQu2bU0llGkOXnphlNaQU0cTfNqaoUQ7ngL3Ju8aJrScU8DeBQpdSurYMn9PXDynvkcNLulp77ixTOuUDa3beUTlPz4PQq3v35g8jbTbNS/gbWq1YnohgxfhCcOyXPRsqCKUpgPc2UVpJl3UEpXlEyq9oVYnj20ZNiKSujdTJ/+0WLXEI+X3IdJHvdfRAs0pRuKFyrGkWKQk0OtizieNj0FP3PWKwGTQM+uN+1zyNqcDDQxw2+kW6WW86sNirjv3aqYjBuAaSlxRfp4rhcCqJhkP3TsnXxn/hjhyA1+TYp8K/gxJqTpdCMUCxiaYlwmyEMlFN00VC5bWeLnD+YsV4Q/rj3O/QvTl/j82X83FK5Hgp5g9QKyyE8yANlL/a5YqbgIDMeXi817iIKPMVfBEK+j42ukUWqLH1xpOnxZ/Q1GR5BPP++0OVHBCRa1dJduQPQaaDnr6Yu7fLx+PMauPtIQUvUbJNA/UqHaNMmVZ6m1kvn2OP6pqqw="
-  bucket: "cherie.website"
-  key: app.tar.gz
-  bundle_type: .tar.gz
+    secure: "bfR/ZgR97HWXRDMg9qpTSACDkwsMS2E/V5P2LxzKjtuc4m0D33oNrMAenWj2IW9VAUkxxmK2p8YlbgrcZ4eEdI30K9VoF4TQCgUG7/HEbXD/7W3UacSJ51bmB0V/G8eWNQj9y1Dx8BSgVQ3uEJG26EPUy3FbdHjVb8wGXczDQUVvYrFEgg11DqohyQ30kSffOK/+lya4R6nljZoPDOn8JHpkSRBCbU+OhvyjQHxBNz1yatzcv44ZB86wnbxYjp9J7CgkK2sCdw5SWxgA5VTChGoGeVAEkii8yJEk2VoITvsUcuQVspCPcMgzLRPap4CqI+BtfURH991iRKEeQ3hdgS96+y0m909aIarjzP3uVuzCkDt9T67FDX0kGZGrRk53whPm8svXbCAUexU4j6d+9IAVIgtjyZDJw0Rzqn4Sxx9Q1/xtFBV77krfViX3pVxhplCeu8FxGAsM9fhg4sbqNt7RBf4okfvYhxJn30VvjX1DnhqyG1tnYWqvLRT8QS6ykQucR4wLMVTrQnxRhTvyMhrFgwt9JHM0dJQ4bmHylQFjkq5WT3eoSmH6Wmk2ldf6mtwEMDGBzy1E+SCikEVTXW74vhYoU9YMdsnG7ZEkjPIDMJ0U9HV0y/b+m0rrMW7kLOUkjk6bWIV8k6jx4uIzmmf8gNTi+Sb/566q5u+e7uc="
+  bucket: cherie.website
+  key: app.tgz
+  bundle_type: tgz
   application: trello-transform
   deployment_group: Normal-Deploy
-  
+  region: us-east-2
 notifications:
   email: false
-
-  
