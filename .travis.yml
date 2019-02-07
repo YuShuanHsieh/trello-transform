@@ -10,6 +10,16 @@ install:
 script:
 - make
 deploy:
+  provider: s3
+  access_key_id: AKIAILZZNNW2UR7S46QQ
+  secret_access_key:
+    secure: "bfR/ZgR97HWXRDMg9qpTSACDkwsMS2E/V5P2LxzKjtuc4m0D33oNrMAenWj2IW9VAUkxxmK2p8YlbgrcZ4eEdI30K9VoF4TQCgUG7/HEbXD/7W3UacSJ51bmB0V/G8eWNQj9y1Dx8BSgVQ3uEJG26EPUy3FbdHjVb8wGXczDQUVvYrFEgg11DqohyQ30kSffOK/+lya4R6nljZoPDOn8JHpkSRBCbU+OhvyjQHxBNz1yatzcv44ZB86wnbxYjp9J7CgkK2sCdw5SWxgA5VTChGoGeVAEkii8yJEk2VoITvsUcuQVspCPcMgzLRPap4CqI+BtfURH991iRKEeQ3hdgS96+y0m909aIarjzP3uVuzCkDt9T67FDX0kGZGrRk53whPm8svXbCAUexU4j6d+9IAVIgtjyZDJw0Rzqn4Sxx9Q1/xtFBV77krfViX3pVxhplCeu8FxGAsM9fhg4sbqNt7RBf4okfvYhxJn30VvjX1DnhqyG1tnYWqvLRT8QS6ykQucR4wLMVTrQnxRhTvyMhrFgwt9JHM0dJQ4bmHylQFjkq5WT3eoSmH6Wmk2ldf6mtwEMDGBzy1E+SCikEVTXW74vhYoU9YMdsnG7ZEkjPIDMJ0U9HV0y/b+m0rrMW7kLOUkjk6bWIV8k6jx4uIzmmf8gNTi+Sb/566q5u+e7uc="
+  bucket: cherie.website
+  skip_cleanup: true
+  region: eu-west-2
+  local_dir: release
+  upload-dir: trello-transform
+
   provider: codedeploy
   access_key_id: AKIAILZZNNW2UR7S46QQ
   secret_access_key:
@@ -20,5 +30,6 @@ deploy:
   application: trello-transform
   deployment_group: Normal-Deploy
   region: us-east-2
+
 notifications:
   email: false

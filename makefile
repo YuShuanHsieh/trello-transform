@@ -2,11 +2,12 @@ all:
 	make ui && make core && make package
 
 ui: 
-	mkdir -p ui && \
-	cd app/ && npm run build && cp -r build/* ../ui
+	mkdir -p release/web && \
+	cd app/ && npm run build && cp -r build/* ../release/web
 
 core:
-	go build -o core main.go
+	go build -o core main.go && \
+	cp core release/
 
 package:
-	tar -czvf app.tgz ui/ core
+	cd release/ && tar -czvf app.tgz web/ core
