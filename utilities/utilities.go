@@ -3,6 +3,7 @@ package utilities
 import (
 	"os"
 	"strconv"
+	"strings"
 )
 
 func GetPortNumber(defaultPort int) int {
@@ -14,4 +15,8 @@ func GetPortNumber(defaultPort int) int {
 	}
 
 	return p
+}
+
+func IsEmptyString(value string) bool {
+	return strings.TrimSpace(value) == ""
 }

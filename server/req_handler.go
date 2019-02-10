@@ -2,12 +2,12 @@ package server
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"regexp"
 
 	"github.com/kataras/iris"
 
+	"github.com/YuShuanHsieh/trello-transform/errors"
 	"github.com/YuShuanHsieh/trello-transform/models"
 	"github.com/YuShuanHsieh/trello-transform/transform"
 	"github.com/YuShuanHsieh/trello-transform/transform/selector"
@@ -15,7 +15,7 @@ import (
 
 func (s *Server) stopServerHandler(ctx iris.Context) {
 	if !isFromLocalHost(ctx.Request().RemoteAddr) {
-		dispatchError(fmt.Errorf("Invalid Operation"), ctx)
+		dispatchError(errors.NewFromStr("Invalid Operation"), ctx)
 	}
 	// TODO should change to a specific function
 	ctx.StatusCode(iris.StatusOK)
@@ -26,12 +26,12 @@ func (s *Server) stopServerHandler(ctx iris.Context) {
 func (s *Server) transformHandler(ctx iris.Context) {
 	file, header, err := ctx.FormFile("file")
 	if err != nil {
-		dispatchError(fmt.Errorf("Get file [%s] error: [%s]", header.Filename, err.Error()), ctx)
+		dispatchError(errors.NewFromFormat("Get file [%s] error: [%s]", header.Filename, err.Error()), ctx)
 		return
 	}
 	content, err := ioutil.ReadAll(file)
 	if err != nil {
-		dispatchError(fmt.Errorf("Read file [%s] error: [%s]", header.Filename, err.Error()), ctx)
+		dispatchError(errors.NewFromFormat("Read file [%s] error: [%s]", header.Filename, err.Error()), ctx)
 		return
 	}
 
@@ -49,7 +49,7 @@ func (s *Server) transformHandler(ctx iris.Context) {
 
 func dispatchError(err error, ctx iris.Context) {
 	res := make(map[string]string)
-	res["message"] = fmt.Sprintf("%s", err.Error())
+	res["message"] = err.Error()
 	ctx.StatusCode(iris.StatusInternalServerError)
 
 	r, _ := json.Marshal(res)
