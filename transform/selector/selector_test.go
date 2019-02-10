@@ -17,9 +17,16 @@ func TestCompareList(t *testing.T) {
 	}{
 		{
 			models.List{
-				Name: "Test",
+				Name: "Book",
 			},
 			false,
+		},
+		{
+			models.List{
+				Closed: true,
+				Name:   "Test",
+			},
+			true,
 		},
 		{
 			models.List{
