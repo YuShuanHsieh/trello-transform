@@ -10,6 +10,7 @@ import (
 
 	"github.com/YuShuanHsieh/trello-transform/models"
 	"github.com/YuShuanHsieh/trello-transform/transform"
+	"github.com/YuShuanHsieh/trello-transform/transform/selector"
 )
 
 func (s *Server) stopServerHandler(ctx iris.Context) {
@@ -35,7 +36,7 @@ func (s *Server) transformHandler(ctx iris.Context) {
 	}
 
 	tr := transform.New(content)
-	tr.Selector(tr.SelectByList(&models.List{Name: "2019/01"}))
+	tr.Select(selector.ByList(tr, models.List{Name: "2019/01"}))
 	tr.Use("list", transform.CardBriefFunc)
 	tr.Use("reference", transform.ExtractReferenceFunc)
 	tr.Use("label", transform.CountLabelsFunc)

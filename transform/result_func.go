@@ -2,14 +2,14 @@ package transform
 
 import (
 	"fmt"
-	"log"
 	"regexp"
 	"time"
 
+	"github.com/YuShuanHsieh/trello-transform/errors"
 	"github.com/YuShuanHsieh/trello-transform/models"
 )
 
-// ResultFunc generate a result value from each cards
+// ResultFunc generate a result value from each card
 type ResultFunc func(*Transform, interface{}, *models.Card) interface{}
 
 // ExtractReferenceFunc extract references with markdown style
@@ -20,7 +20,7 @@ func ExtractReferenceFunc(tr *Transform, preValue interface{}, c *models.Card) i
 	}
 	reg, err := regexp.Compile(`[[][\S\s]+[]][(][\S]+[)]`)
 	if err != nil {
-		log.Printf("Extract reference error: %s \n", err.Error())
+		errors.Log(err.Error())
 		return nil
 	}
 	targets := reg.FindAllString(c.Desc, -1)
@@ -59,11 +59,11 @@ func CardBriefFunc(tr *Transform, preValue interface{}, c *models.Card) interfac
 
 	t, err := time.Parse(time.RFC3339, c.Due)
 	if err != nil {
-		log.Printf("[Transform] Parse time error %s", err.Error())
+		errors.Log(err.Error())
 		return nil
 	}
 
-	item := fmt.Sprintf("%d %s %d - %s", t.Year(), t.Month().String(), t.Day(), c.Name)
+	item := fmt.Sprintf("%d %d %d - %s", t.Year(), t.Month(), t.Day(), c.Name)
 
 	v = append(v, item)
 	return v

@@ -1,5 +1,7 @@
 package models
 
+type SeletorFunc func(*Card) bool
+
 type TrelloTable struct {
 	Name   string  `json:"name"`
 	Cards  []Card  `json:"cards"`

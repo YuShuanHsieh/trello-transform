@@ -2,7 +2,7 @@
 
 ## Description
 
-Small project for transform json file exported from trello to customized output.
+Simple project for transform json file exported from trello to customized output.
 
 ## Why use it
 
@@ -11,11 +11,11 @@ Small project for transform json file exported from trello to customized output.
 
 ## How to use / test
 
-- export json file from your card
+- export json file from your card (for free users)
 - run `go run main.go` to start the web server
 - run `go run cmd/cmd.go <your trello json file> | json_pp`
 
-### Example
+### How to change to code
 
 ```go
 // content is []byte type from json file

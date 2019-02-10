@@ -12,7 +12,7 @@ type Transform struct {
 	labelsMap    map[string]*models.Label
 	listsMap     map[string]*models.List
 	briefFnMap   map[string]ResultFunc
-	selectorChan []SeletorFunc
+	selectorChan []models.SeletorFunc
 	result       map[string]interface{}
 }
 
@@ -49,7 +49,7 @@ func (t *Transform) allocateListsMap() {
 	}
 }
 
-func (t *Transform) Selector(fn SeletorFunc) {
+func (t *Transform) Select(fn models.SeletorFunc) {
 	if fn != nil {
 		t.selectorChan = append(t.selectorChan, fn)
 	}
@@ -87,4 +87,12 @@ func (t *Transform) GetAllResult() map[string]interface{} {
 
 func (t *Transform) GetResult(key string) interface{} {
 	return t.result[key]
+}
+
+func (t *Transform) GetListById(id string) *models.List {
+	value, ok := t.listsMap[id]
+	if !ok {
+		return nil
+	}
+	return value
 }
