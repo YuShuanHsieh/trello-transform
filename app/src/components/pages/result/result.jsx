@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
+import { createSelector } from 'reselect';
 
 import { ObjectView } from '../../shared/objectView';
 import style from './result.module.css';
@@ -28,10 +29,26 @@ ResultComponent.propTypes = {
   result: PropTypes.oneOfType([PropTypes.object, PropTypes.array]).isRequired,
 };
 
+const resultSelector = createSelector(
+  state => state.result,
+  (result) => {
+    if (result.list && result.list.length > 0) {
+      result.list.sort((a, b) => {
+        const aDate = new Date(a.date);
+        const bDate = new Date(b.date);
+        return aDate.getTime() - bDate.getTime();
+      });
+      const list = result.list.map(item => (`${item.date} - ${item.title}`));
+      return { ...result, list };
+    }
+    return result;
+  },
+);
+
 function mapStateTpProps(state) {
   return {
     uploaded: state.uploaded,
-    result: state.result,
+    result: resultSelector(state),
   };
 }
 

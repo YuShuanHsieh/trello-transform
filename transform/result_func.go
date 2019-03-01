@@ -13,6 +13,11 @@ import (
 // ResultFunc generate a result value from each card
 type ResultFunc func(*Transform, interface{}, *models.Card) interface{}
 
+type CardBrief struct {
+	Date  string `json:"date"`
+	Title string `json:"title"`
+}
+
 // ExtractReferenceFunc extract references with markdown style
 func ExtractReferenceFunc(tr *Transform, preValue interface{}, c *models.Card) interface{} {
 	arr, ok := preValue.([]string)
@@ -52,10 +57,10 @@ func CardBriefFunc(tr *Transform, preValue interface{}, c *models.Card) interfac
 		return nil
 	}
 
-	v, ok := preValue.([]string)
+	v, ok := preValue.([]CardBrief)
 
 	if !ok {
-		v = []string{}
+		v = []CardBrief{}
 	}
 
 	t, err := time.Parse(time.RFC3339, c.Due)
@@ -64,8 +69,9 @@ func CardBriefFunc(tr *Transform, preValue interface{}, c *models.Card) interfac
 		return nil
 	}
 
-	item := fmt.Sprintf("%d %d %d - %s", t.Year(), t.Month(), t.Day(), c.Name)
-
-	v = append(v, item)
+	v = append(v, CardBrief{
+		Date:  fmt.Sprintf("%d/%d/%d", t.Year(), t.Month(), t.Day()),
+		Title: c.Name,
+	})
 	return v
 }
