@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"net/http"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 
@@ -23,7 +24,7 @@ func (s *Server) stopServerHandler(c *gin.Context) {
 		)
 	}
 	dispatchSuccess("success", c)
-	// TODO shotdown server
+	s.stop <- syscall.SIGINT
 }
 
 func (s *Server) transformHandler(c *gin.Context) {
