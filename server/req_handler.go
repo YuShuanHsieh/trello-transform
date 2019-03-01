@@ -3,61 +3,88 @@ package server
 import (
 	"encoding/json"
 	"io/ioutil"
-	"regexp"
+	"net/http"
 
-	"github.com/kataras/iris"
+	"github.com/gin-gonic/gin"
 
 	"github.com/YuShuanHsieh/trello-transform/errors"
 	"github.com/YuShuanHsieh/trello-transform/models"
 	"github.com/YuShuanHsieh/trello-transform/transform"
 	"github.com/YuShuanHsieh/trello-transform/transform/selector"
+	"github.com/YuShuanHsieh/trello-transform/utilities"
 )
 
-func (s *Server) stopServerHandler(ctx iris.Context) {
-	if !isFromLocalHost(ctx.Request().RemoteAddr) {
-		dispatchError(errors.NewFromStr("Invalid Operation"), ctx)
+func (s *Server) stopServerHandler(c *gin.Context) {
+	if !utilities.IsFromLocalHost(c.Request.RemoteAddr) {
+		dispatchError(
+			errors.NewFromStr("Invalid Operation"),
+			http.StatusForbidden,
+			c,
+		)
 	}
-	// TODO should change to a specific function
-	ctx.StatusCode(iris.StatusOK)
-	ctx.WriteString("success")
-	s.server.Shutdown(s.ctx)
+	dispatchSuccess("success", c)
+	// TODO shotdown server
 }
 
-func (s *Server) transformHandler(ctx iris.Context) {
-	file, header, err := ctx.FormFile("file")
+func (s *Server) transformHandler(c *gin.Context) {
+	file, err := c.FormFile("file")
 	if err != nil {
-		dispatchError(errors.NewFromFormat("Get file [%s] error: [%s]", header.Filename, err.Error()), ctx)
+		dispatchError(
+			errors.NewFromFormat("Get file [%s] error: [%s]", file.Filename, err.Error()),
+			http.StatusBadRequest,
+			c,
+		)
 		return
 	}
-	content, err := ioutil.ReadAll(file)
+	f, _ := file.Open()
+	content, err := ioutil.ReadAll(f)
 	if err != nil {
-		dispatchError(errors.NewFromFormat("Read file [%s] error: [%s]", header.Filename, err.Error()), ctx)
+		dispatchError(
+			errors.NewFromFormat("Read file [%s] error: [%s]", file.Filename, err.Error()),
+			http.StatusInternalServerError,
+			c,
+		)
+		return
+	}
+
+	var list models.List
+	err = getListFromFormData(&list, c)
+	if err != nil {
+		dispatchError(
+			errors.NewFromFormat("Read list error: [%s]", err.Error()),
+			http.StatusInternalServerError,
+			c,
+		)
 		return
 	}
 
 	tr := transform.New(content)
-	tr.Select(selector.ByList(tr, models.List{Name: "2019/01"}))
+	tr.Select(selector.ByList(tr, list))
 	tr.Use("list", transform.CardBriefFunc)
 	tr.Use("reference", transform.ExtractReferenceFunc)
 	tr.Use("label", transform.CountLabelsFunc)
 	tr.Exec()
 
 	json, _ := json.Marshal(tr.GetAllResult())
-	ctx.StatusCode(iris.StatusOK)
-	ctx.WriteString(string(json))
+	dispatchSuccess(string(json), c)
 }
 
-func dispatchError(err error, ctx iris.Context) {
+func dispatchSuccess(result string, c *gin.Context) {
+	c.String(http.StatusOK, result)
+}
+
+func dispatchError(err error, statusCode int, c *gin.Context) {
 	res := make(map[string]string)
 	res["message"] = err.Error()
-	ctx.StatusCode(iris.StatusInternalServerError)
 
-	r, _ := json.Marshal(res)
-	ctx.WriteString(string(r))
-	ctx.StopExecution()
+	c.AbortWithStatusJSON(statusCode, res)
 }
 
-func isFromLocalHost(remoteAddr string) bool {
-	matched, _ := regexp.MatchString("^\\[::1\\]", remoteAddr)
-	return matched
+func getListFromFormData(list *models.List, c *gin.Context) error {
+	raw := c.PostForm("list")
+	err := json.Unmarshal([]byte(raw), list)
+	if err != nil {
+		return err
+	}
+	return nil
 }

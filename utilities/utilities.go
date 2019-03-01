@@ -2,9 +2,19 @@ package utilities
 
 import (
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 )
+
+func IsEmptyString(value string) bool {
+	return strings.TrimSpace(value) == ""
+}
+
+func IsFromLocalHost(remoteAddr string) bool {
+	matched, _ := regexp.MatchString("^\\[::1\\]", remoteAddr)
+	return matched
+}
 
 func GetPortNumber(defaultPort int) int {
 	var p int
@@ -15,8 +25,4 @@ func GetPortNumber(defaultPort int) int {
 	}
 
 	return p
-}
-
-func IsEmptyString(value string) bool {
-	return strings.TrimSpace(value) == ""
 }
