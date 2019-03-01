@@ -47,6 +47,14 @@ func (s *Server) Run() {
 		Handler: s.engine,
 	}
 
+	go func() {
+		<-s.stop
+		log.Println("Server is stopping")
+		if err := srv.Shutdown(s.ctx); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
 	if err := srv.ListenAndServe(); err != nil {
 		if err == http.ErrServerClosed {
 			log.Println("Server stopped")
@@ -54,13 +62,4 @@ func (s *Server) Run() {
 			errors.Log(err.Error())
 		}
 	}
-
-	go func() {
-		<-s.stop
-		log.Panicln("Server is stopping")
-		if err := srv.Shutdown(s.ctx); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
 }
