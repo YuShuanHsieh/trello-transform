@@ -11,6 +11,7 @@
       }
   },
   "rules": {
+    "react/prefer-stateless-function": [true, { "ignorePureComponents":true }],
     "no-console": ["error", { "allow": ["warn", "debug"] }],
     "jsx-a11y/label-has-for": "off",
     "import/prefer-default-export": "off",
