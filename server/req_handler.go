@@ -12,19 +12,19 @@ import (
 	"github.com/YuShuanHsieh/trello-transform/models"
 	"github.com/YuShuanHsieh/trello-transform/transform"
 	"github.com/YuShuanHsieh/trello-transform/transform/selector"
-	"github.com/YuShuanHsieh/trello-transform/utilities"
+	"github.com/YuShuanHsieh/trello-transform/validators"
 )
 
 func (s *Server) stopServerHandler(c *gin.Context) {
-	if !utilities.IsFromLocalHost(c.Request.RemoteAddr) {
+	if !validators.IsFromLocalHost(c.Request.RemoteAddr) {
 		dispatchError(
 			errors.NewFromStr("Invalid Operation"),
 			http.StatusForbidden,
 			c,
 		)
 	}
-	dispatchSuccess("success", c)
 	s.stop <- syscall.SIGINT
+	dispatchSuccess("success", c)
 }
 
 func (s *Server) transformHandler(c *gin.Context) {

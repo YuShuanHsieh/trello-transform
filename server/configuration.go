@@ -1,6 +1,6 @@
 package server
 
-import "github.com/YuShuanHsieh/trello-transform/utilities"
+import "github.com/YuShuanHsieh/trello-transform/system"
 
 const (
 	DefaultFilePath = "./"
@@ -13,7 +13,7 @@ type ServerConfiguration struct {
 }
 
 func defaultConfiguration() *ServerConfiguration {
-	p := utilities.GetPortNumber(DefaultPort)
+	p := system.GetPortNumber(DefaultPort)
 	return &ServerConfiguration{
 		FilePath: DefaultFilePath,
 		Port:     p}

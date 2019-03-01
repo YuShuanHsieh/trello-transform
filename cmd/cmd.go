@@ -12,7 +12,7 @@ import (
 	"os"
 
 	"github.com/YuShuanHsieh/trello-transform/server"
-	"github.com/YuShuanHsieh/trello-transform/utilities"
+	"github.com/YuShuanHsieh/trello-transform/system"
 )
 
 func main() {
@@ -37,7 +37,7 @@ func main() {
 }
 
 func createStopServerRequest() *http.Request {
-	port := utilities.GetPortNumber(server.DefaultPort)
+	port := system.GetPortNumber(server.DefaultPort)
 	url := fmt.Sprintf("http://localhost:%d/server/stop", port)
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
@@ -60,7 +60,7 @@ func createTransformRequest(filePath string) *http.Request {
 	io.Copy(fw, file)
 	w.Close()
 
-	port := utilities.GetPortNumber(server.DefaultPort)
+	port := system.GetPortNumber(server.DefaultPort)
 	url := fmt.Sprintf("http://localhost:%d/transform", port)
 	req, err := http.NewRequest("POST", url, &buf)
 	if err != nil {

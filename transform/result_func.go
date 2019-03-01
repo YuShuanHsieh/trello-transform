@@ -7,7 +7,7 @@ import (
 
 	"github.com/YuShuanHsieh/trello-transform/errors"
 	"github.com/YuShuanHsieh/trello-transform/models"
-	"github.com/YuShuanHsieh/trello-transform/utilities"
+	"github.com/YuShuanHsieh/trello-transform/validators"
 )
 
 // ResultFunc generate a result value from each card
@@ -48,7 +48,7 @@ func CountLabelsFunc(tr *Transform, preValue interface{}, c *models.Card) interf
 
 // CardBriefFunc Generate a short sentence from a card. This is a example to combine date with title.
 func CardBriefFunc(tr *Transform, preValue interface{}, c *models.Card) interface{} {
-	if utilities.IsEmptyString(c.Due) || utilities.IsEmptyString(c.Name) {
+	if validators.IsEmptyString(c.Due) || validators.IsEmptyString(c.Name) {
 		return nil
 	}
 
