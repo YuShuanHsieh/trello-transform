@@ -1,9 +1,9 @@
 /* eslint-disable react/forbid-prop-types */
-import React from 'react';
+import React, { createRef } from 'react';
 import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router-dom';
-import { Button } from '@material-ui/core';
+import { Button, TextField } from '@material-ui/core';
 
 import { FileSelector } from '../../shared/fileSelector';
 import { transformData } from '../../../store/actions';
@@ -27,13 +27,18 @@ export class HomeComponent extends React.Component {
 
   validTypes = ['json'];
 
+  inputRef = createRef()
+
   handleUploadFile = (uploadFile) => {
     this.setState({ file: uploadFile });
   }
 
   handleSubmit = () => {
     if (this.state.file) {
-      this.props.transformData(this.state.file);
+      this.props.transformData({
+        file: this.state.file,
+        list: JSON.stringify({ name: this.inputRef.current.value }), // TODO hard code to list name
+      });
       this.props.history.push(routePath.result);
     }
   }
@@ -47,7 +52,14 @@ export class HomeComponent extends React.Component {
           <div className={style.uploadFile}>
             <FileSelector uploadFile={this.handleUploadFile} validTypes={this.validTypes} />
             <div style={{ flex: 1 }} />
-            <Button variant="outlined" disabled={!this.state.file} onClick={this.handleSubmit}>SUBMIT</Button>
+            <TextField
+              inputRef={this.inputRef}
+              id="list"
+              label="List Name"
+            />
+          </div>
+          <div className={style.uploadFile}>
+            <Button variant="outlined" onClick={this.handleSubmit}>SUBMIT</Button>
           </div>
         </div>
       </div>
