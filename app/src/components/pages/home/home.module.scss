@@ -1,0 +1,30 @@
+@import "../../../styles/mixin";
+@import "../../../styles/theme";
+
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100%;
+  background: appColor($darkTheme, 'primary');
+}
+
+h1 {
+  font-size: 60px;
+  color: rgba(appColor($darkTheme, 'text-light'), 0.8);
+}
+
+.subTitle {
+  color: appColor($darkTheme, 'text-light');
+}
+
+.uploadFile {
+  padding-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.filed {
+  color: appColor($darkTheme, 'primary') !important;
+}

@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { NavLink } from 'react-router-dom';
 import { IconLabel } from './iconLabel';
-import style from './labelLink.module.css';
+import style from './labelLink.module.scss';
 
 export function LabelLink({ path, ...rest }) {
   return (

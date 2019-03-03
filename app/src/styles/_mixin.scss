@@ -1,0 +1,5 @@
+@import "./theme";
+
+@function appColor($theme, $key) {
+  @return map-get($theme, $key)
+};

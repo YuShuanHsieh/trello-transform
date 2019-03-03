@@ -9,7 +9,7 @@ import { FileSelector } from '../../shared/fileSelector';
 import { transformData } from '../../../store/actions';
 import { routePath } from '../../../configuration';
 
-import style from './home.module.css';
+import style from './home.module.scss';
 
 export class HomeComponent extends React.Component {
   static propTypes = {
@@ -45,21 +45,22 @@ export class HomeComponent extends React.Component {
 
   render() {
     return (
-      <div className={`${style.homeContainer} animated fadeInDown slow`}>
-        <div>
+      <div className={style.home}>
+        <div className="animated fadeInDown slow">
           <h1>{this.title}</h1>
-          <span>{this.subTitle}</span>
+          <span className={style.subTitle}>{this.subTitle}</span>
           <div className={style.uploadFile}>
             <FileSelector uploadFile={this.handleUploadFile} validTypes={this.validTypes} />
             <div style={{ flex: 1 }} />
             <TextField
+              classes={{ label: style.filed }}
               inputRef={this.inputRef}
               id="list"
               label="List Name"
             />
           </div>
           <div className={style.uploadFile}>
-            <Button variant="outlined" onClick={this.handleSubmit}>SUBMIT</Button>
+            <Button variant="contained" color="secondary" onClick={this.handleSubmit}>SUBMIT</Button>
           </div>
         </div>
       </div>
