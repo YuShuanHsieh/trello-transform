@@ -1,15 +1,16 @@
 @import "../../styles//mixin";
 
-$background: color("primary");
-$text: color("background");
+$background: color("background");
+$text: color("primary");
 
 .header {
   background: $background;
   &Logo {
-    padding: 1rem;
+    margin: 0;
     font-size: 45px;
+    padding: 1rem;
     color: $text;
     letter-spacing: 2px;
-    font-weight: bold;
+    font-weight: 300;
   }
 }

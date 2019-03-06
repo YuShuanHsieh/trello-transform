@@ -1,5 +1,4 @@
 import React, { useCallback, useState, SyntheticEvent } from 'react';
-import { FaHeart } from 'react-icons/fa';
 
 import IconLink from '../../iconLink/iconLink';
 import { NavItemView } from './navLinks';
@@ -10,7 +9,7 @@ interface NavLinkProps {
 }
 
 function NavLink(props: NavLinkProps): JSX.Element {
-  const [show, setShow] = useState(false);
+  const [show, setShow] = useState(true);
   const [target, setTarget] = useState<HTMLElement|undefined>(undefined);
   const handleMouseEnter = useCallback((e: SyntheticEvent<HTMLDivElement>) => {
     if (props.item.children.length > 0) {
@@ -20,7 +19,7 @@ function NavLink(props: NavLinkProps): JSX.Element {
   }, []);
 
   const handleMouseLeave = useCallback(() => {
-    setShow(false);
+    //setShow(false);
   }, []);
 
   return (
@@ -28,7 +27,7 @@ function NavLink(props: NavLinkProps): JSX.Element {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
-      <IconLink text={props.item.displayName} icon={FaHeart} />
+      <IconLink text={props.item.displayName} />
       { show ? (
         <div style={{ position: 'absolute', left: 0, width: '100%' }}>
           <NavMenu target={target} items={props.item.children} />

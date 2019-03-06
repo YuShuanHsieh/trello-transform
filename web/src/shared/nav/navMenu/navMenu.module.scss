@@ -1,6 +1,6 @@
 @import "../../../styles/mixin";
 
-$background: color("background");
+$background: rgba(color("primary"), 0.5);
 $text: textColor("primary");
 
 .menu {
@@ -20,6 +20,7 @@ $text: textColor("primary");
     list-style-type: none;
     display: flex;
     padding: 0;
+    margin: 0;
     color: $text;
     justify-content: flex-end;
     li {

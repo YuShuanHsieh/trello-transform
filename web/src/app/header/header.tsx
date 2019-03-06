@@ -14,7 +14,7 @@ const items: NavItem[] = [
 function Header(): JSX.Element {
   return (
     <header className={styles.header}>
-      <div className={styles.headerLogo}>Trello Transform</div>
+      <h1 className={styles.headerLogo}>Trello Transform</h1>
       <NavLinks items={items} />
     </header>
   );

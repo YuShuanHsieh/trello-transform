@@ -11,7 +11,7 @@ export default function IconLink(props: IconLinkProps): JSX.Element {
   const { icon: Icon, text } = props;
   return (
     <div className={styles.iconLink}>
-      <span className={styles.iconLinkIcon}>{ Icon ? <Icon /> : null }</span>
+      { Icon ? <span className={styles.iconLinkIcon}><Icon /></span> : null }
       <span className={styles.iconLinkText}>{ text }</span>
     </div>
   );
