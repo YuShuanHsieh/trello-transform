@@ -2,61 +2,58 @@
 
 ## Description
 
-Simple project for transform json file exported from trello to customized output.
+A simple project for transform json file exported from trello to customized output.
 
 ## Why use it
 
 1. Sometime You just need few data from trello cards. Use Trello API to retrieve data is too heavy work to you.
-2. When you create lots of cards on trello board and want to group parts of information from them.
+2. When you create lots of cards on trello board and want to pick up parts of information from them.
 
 ## How to use / test
 
-- export json file from your card (for free users)
+- Export json files from your Trello table (this feature is for free users)
 - run `go run main.go` to start the web server
-- run `go run cmd/cmd.go <your trello json file> | json_pp`
+- run `go run cmd/cmd.go <your trello json file> | json_pp` (Website is preparing)
 
-### How to change to code
+### How to add more handler
 
 ```go
-// content is []byte type from json file
+// The type of content is []byte
 tr := transform.New(content)
 
-// Now selector function only support `SelectByList`
-tr.Selector(tr.SelectByList(&models.List{Name: "2019/01"}))
+// Add a selector for filter cards.
+tr.Select(selector.ByList(trello.List{name: "2019/02"}))
 
-// `CardBriefFunc`, `ExtractReferenceFunc`, `CountLabelsFunc` are default fn for service. Or you can create your result config function
-tr.Use("list", transform.CardBriefFunc)
-tr.Use("reference", transform.ExtractReferenceFunc)
-tr.Use("label", transform.CountLabelsFunc)
+// Use handlers to pick up information from each card
+tr.Use("list", defaultHandler.CardBriefHandler)
+tr.Use("reference", defaultHandler.ExtractReferenceHandler)
+tr.Use("label", defaultHandler.CountLabelsHandler)
 
 // Call this function to transform cards
 tr.Exec()
-
-json, err := json.Marshal(tr.GetAllResult())
-if err != nil {
-	log.Printf(err.Error())
-}
-log.Printf("%s", json)
 ```
 
-## Create a customized `ResultConfig` function
+## Create a `TransformHandler`
 
 ```go
-type ResultConfigFn func(*Transform, interface{}, *models.Card) interface{}
+type TransformHandler func(*Context, Accumulator, *trello.Card) (Accumulator, error)
 
-func CountLabelsFn(tr *Transform, preValue interface{}, c *models.Card) interface{} {
-	labelsMap, ok := preValue.(map[string]int)
+func ExtractReferenceHandler(
+	ctx *transform.Context,
+	acc transform.Accumulator,
+	c *trello.Card,
+) (transform.Accumulator, error) {
+	// Check the underlying data type first.
+	value, ok := acc.([]string)
 	if !ok {
-		labelsMap = make(map[string]int)
+		value = []string{}
 	}
-	for _, id := range c.IDLabels {
-		v, ok := tr.labelsMap[id]
-		if ok {
-			labelsMap[v.Name]++
-		}
+	reg, err := regexp.Compile(`[[][\S\s]+[]][(][\S]+[)]`)
+	if err != nil {
+		return acc, err
 	}
-
-	return labelsMap
+	targets := reg.FindAllString(c.Desc, -1)
+	return append(value, targets...), nil
 }
 ```
 
@@ -64,6 +61,6 @@ func CountLabelsFn(tr *Transform, preValue interface{}, c *models.Card) interfac
 
 ```go
 // Cards with target list name will be transformed.
-// Add this line before call `tr.TransformFromTrello()`
-tr.Selector(tr.SelectByList(&models.List{Name: "2019/01"}))
+// Add this line before call `tr.Exec()`
+tr.Select(selector.ByList(trello.List{name: "2019/02"}))
 ``` 
