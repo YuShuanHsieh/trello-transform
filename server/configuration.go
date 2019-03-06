@@ -1,6 +1,6 @@
 package server
 
-import "github.com/YuShuanHsieh/trello-transform/system"
+import "github.com/YuShuanHsieh/trello-transform/helpers/system"
 
 const (
 	DefaultFilePath = "./"

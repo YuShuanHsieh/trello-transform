@@ -1,79 +1,110 @@
 package transform
 
 import (
+	"encoding/json"
 	"log"
 
-	"github.com/YuShuanHsieh/trello-transform/models"
 	"github.com/YuShuanHsieh/trello-transform/trello"
 )
 
+type Seletor func(*Context, *trello.Card) bool
+
+type Accumulator interface{}
+
+type TransformHandler func(*Context, Accumulator, *trello.Card) (Accumulator, error)
+
 type Transform struct {
-	table        models.TrelloTable
-	labelsMap    map[string]*models.Label
-	listsMap     map[string]*models.List
-	briefFnMap   map[string]ResultFunc
-	selectorChan []models.SeletorFunc
-	result       map[string]interface{}
+	table     trello.Table
+	labels    map[string]*trello.Label
+	lists     map[string]*trello.List
+	handlers  map[string]TransformHandler
+	selectors []Seletor
+	result    map[string]interface{}
+}
+
+type Context struct {
+	Labels map[string]trello.Label
+	Lists  map[string]trello.List
 }
 
 func New(rawData []byte) *Transform {
 	t := initTransform()
 
-	err := trello.UnmarshalJson(rawData, &t.table)
+	err := UnmarshalJson(rawData, &t.table)
 	if err != nil {
 		log.Println(err.Error())
 		return nil
 	}
-	t.allocateLabelsMap()
-	t.allocateListsMap()
+	t.allocateLabels()
+	t.allocateLists()
 	return t
 }
 
 func initTransform() *Transform {
 	return &Transform{
-		listsMap:   make(map[string]*models.List),
-		labelsMap:  make(map[string]*models.Label),
-		briefFnMap: make(map[string]ResultFunc),
-		result:     make(map[string]interface{})}
+		lists:    make(map[string]*trello.List),
+		labels:   make(map[string]*trello.Label),
+		handlers: make(map[string]TransformHandler),
+		result:   make(map[string]interface{})}
 }
 
-func (t *Transform) allocateLabelsMap() {
+func (t *Transform) allocateLabels() {
 	for i, v := range t.table.Labels {
-		t.labelsMap[v.ID] = &t.table.Labels[i]
+		t.labels[v.ID] = &t.table.Labels[i]
 	}
 }
 
-func (t *Transform) allocateListsMap() {
+func (t *Transform) allocateLists() {
 	for i, v := range t.table.Lists {
-		t.listsMap[v.ID] = &t.table.Lists[i]
+		t.lists[v.ID] = &t.table.Lists[i]
 	}
 }
 
-func (t *Transform) Select(fn models.SeletorFunc) {
-	if fn != nil {
-		t.selectorChan = append(t.selectorChan, fn)
+func (t *Transform) Select(s Seletor) {
+	if s != nil {
+		t.selectors = append(t.selectors, s)
 	}
 }
 
-func (t *Transform) Use(key string, fn ResultFunc) {
-	t.briefFnMap[key] = fn
+func (t *Transform) Use(key string, fn TransformHandler) {
+	t.handlers[key] = fn
 }
 
 func (t *Transform) Exec() {
-	skipSeletors := len(t.selectorChan) == 0
+	ctx := t.createContext()
+	skipSeletors := len(t.selectors) == 0
 	for _, card := range t.table.Cards {
-		if !skipSeletors && !t.IsSelectCard(&card) {
+		if !skipSeletors && !t.IsSelectCard(ctx, &card) {
 			continue
 		}
-		for key, fn := range t.briefFnMap {
-			t.result[key] = fn(t, t.result[key], &card)
+		for key, handler := range t.handlers {
+			acc, err := handler(ctx, t.result[key], &card)
+			if err != nil {
+				// log errors
+			}
+			t.result[key] = acc
 		}
 	}
 }
 
-func (t *Transform) IsSelectCard(c *models.Card) bool {
-	for _, fn := range t.selectorChan {
-		selectorFunc := fn(c)
+func (t *Transform) createContext() *Context {
+	labels := make(map[string]trello.Label)
+	lists := make(map[string]trello.List)
+	for key, value := range t.labels {
+		labels[key] = *value
+	}
+	for key, value := range t.lists {
+		lists[key] = *value
+	}
+	return &Context{
+		Lists:  lists,
+		Labels: labels,
+	}
+}
+
+func (t *Transform) IsSelectCard(ctx *Context, c *trello.Card) bool {
+	for _, s := range t.selectors {
+		selectorFunc := s(ctx, c)
 		if !selectorFunc {
 			return false
 		}
@@ -89,10 +120,10 @@ func (t *Transform) GetResult(key string) interface{} {
 	return t.result[key]
 }
 
-func (t *Transform) GetListById(id string) *models.List {
-	value, ok := t.listsMap[id]
-	if !ok {
-		return nil
+func UnmarshalJson(jsonData []byte, t *trello.Table) error {
+	err := json.Unmarshal(jsonData, t)
+	if err != nil {
+		return err
 	}
-	return value
+	return nil
 }

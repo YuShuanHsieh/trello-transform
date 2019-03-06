@@ -9,10 +9,11 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"github.com/YuShuanHsieh/trello-transform/errors"
-	"github.com/YuShuanHsieh/trello-transform/models"
+	"github.com/YuShuanHsieh/trello-transform/helpers/validators"
 	"github.com/YuShuanHsieh/trello-transform/transform"
+	"github.com/YuShuanHsieh/trello-transform/transform/defaultHandler"
 	"github.com/YuShuanHsieh/trello-transform/transform/selector"
-	"github.com/YuShuanHsieh/trello-transform/validators"
+	"github.com/YuShuanHsieh/trello-transform/trello"
 )
 
 func (s *Server) stopServerHandler(c *gin.Context) {
@@ -48,7 +49,7 @@ func (s *Server) transformHandler(c *gin.Context) {
 		return
 	}
 
-	var list models.List
+	var list trello.List
 	err = getListFromFormData(&list, c)
 	if err != nil {
 		dispatchError(
@@ -60,10 +61,10 @@ func (s *Server) transformHandler(c *gin.Context) {
 	}
 
 	tr := transform.New(content)
-	tr.Select(selector.ByList(tr, list))
-	tr.Use("list", transform.CardBriefFunc)
-	tr.Use("reference", transform.ExtractReferenceFunc)
-	tr.Use("label", transform.CountLabelsFunc)
+	tr.Select(selector.ByList(list))
+	tr.Use("list", defaultHandler.CardBriefHandler)
+	tr.Use("reference", defaultHandler.ExtractReferenceHandler)
+	tr.Use("label", defaultHandler.CountLabelsHandler)
 	tr.Exec()
 
 	json, _ := json.Marshal(tr.GetAllResult())
@@ -81,7 +82,7 @@ func dispatchError(err error, statusCode int, c *gin.Context) {
 	c.AbortWithStatusJSON(statusCode, res)
 }
 
-func getListFromFormData(list *models.List, c *gin.Context) error {
+func getListFromFormData(list *trello.List, c *gin.Context) error {
 	raw := c.PostForm("list")
 	err := json.Unmarshal([]byte(raw), list)
 	if err != nil {
