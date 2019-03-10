@@ -5,6 +5,6 @@ import (
 )
 
 func main() {
-	s := server.Default()
-	s.Run()
+	srv := server.New(server.Port(8080))
+	srv.Run()
 }

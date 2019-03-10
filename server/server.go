@@ -18,15 +18,16 @@ type Server struct {
 	stop          chan os.Signal
 	ctx           stdContext.Context
 	engine        *gin.Engine
-	configuration *ServerConfiguration
+	configuration *Configuration
 }
 
-func Default() *Server {
-	config := defaultConfiguration()
-	return New(config)
-}
+func New(options ...ConfigOption) *Server {
+	config := defaultConfiguration
 
-func New(config *ServerConfiguration) *Server {
+	for _, opt := range options {
+		opt(&config)
+	}
+
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, syscall.SIGINT, syscall.SIGTERM)
 
@@ -34,7 +35,7 @@ func New(config *ServerConfiguration) *Server {
 		stop:          stop,
 		ctx:           stdContext.Background(),
 		engine:        gin.Default(),
-		configuration: config,
+		configuration: &config,
 	}
 }
 
