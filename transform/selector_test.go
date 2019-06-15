@@ -1,42 +1,43 @@
 package transform
 
 import (
-	"github.com/YuShuanHsieh/trello-transform/models"
 	"testing"
+
+	"github.com/YuShuanHsieh/trello-transform/trello"
 )
 
 func TestCompareList(t *testing.T) {
-	target := models.List{
+	target := trello.List{
 		Closed: true,
 		Name:   "TestList",
 	}
 
 	results := []struct {
-		list     models.List
+		list     trello.List
 		expected bool
 	}{
 		{
-			models.List{
+			trello.List{
 				Name: "Book",
 			},
 			false,
 		},
 		{
-			models.List{
+			trello.List{
 				Closed: true,
 				Name:   "Test",
 			},
 			true,
 		},
 		{
-			models.List{
+			trello.List{
 				Closed: true,
 				Name:   "TestList",
 			},
 			true,
 		},
 		{
-			models.List{
+			trello.List{
 				Closed: false,
 				Name:   "TestList",
 			},
@@ -50,5 +51,35 @@ func TestCompareList(t *testing.T) {
 			t.Errorf("Expected %t but got %t \n", result.expected, test)
 		}
 	}
+}
 
+func TestSelectByNames(t *testing.T) {
+	var ctx Context
+	tests := []struct {
+		selector Seletor
+		card     trello.Card
+		expect   bool
+	}{
+		{
+			selector: ByListNames("Card1", "Card2", "Card3"),
+			card: trello.Card{
+				Name: "Card1",
+			},
+			expect: true,
+		},
+		{
+			selector: ByListNames("Card2", "Card3"),
+			card: trello.Card{
+				Name: "Card1",
+			},
+			expect: false,
+		},
+	}
+	var result bool
+	for _, test := range tests {
+		result = test.selector(ctx, &test.card)
+		if result != test.expect {
+			t.Errorf("Expected %t but got %t", test.expect, result)
+		}
+	}
 }
