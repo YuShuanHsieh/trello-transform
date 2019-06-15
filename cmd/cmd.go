@@ -16,7 +16,7 @@ func main() {
 	var err error
 	flag.StringVar(&filePath, "file", "", "import local json file")
 	list := flag.String("lists", "", "filter list names. Separate each list name by `,`")
-	types := flag.String("types", "headers", "display data types. Separate each list name by `,`")
+	types := flag.String("types", "headers", "display data types. Separate each type by `,`")
 	flag.Parse()
 
 	if filePath != "" {
