@@ -6,10 +6,8 @@ main() {
   if local_go_version_is_latest_stable
   then
     run_gofmt
-    run_golint
     run_govet
   fi
-  run_unit_tests
 }
 
 local_go_version_is_latest_stable() {
