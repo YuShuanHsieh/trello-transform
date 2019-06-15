@@ -11,8 +11,10 @@ import (
 // Seletor is function for filtering a card
 type Seletor func(Context, *trello.Card) bool
 
-// Accumulator is the collection of output value
-type Accumulator interface{}
+// Accumulator
+type Accumulator interface {
+	String() string
+}
 
 type Transformer func(Context, Accumulator, *trello.Card) (Accumulator, error)
 
@@ -21,7 +23,7 @@ type Transform struct {
 	ctx          Context
 	transformers map[string]Transformer
 	selectors    []Seletor
-	result       map[string]interface{}
+	result       map[string]Accumulator
 
 	logger logger.Logger
 }
@@ -38,7 +40,7 @@ func New(rawData []byte) *Transform {
 			Labels: make(map[string]trello.Label),
 		},
 		transformers: make(map[string]Transformer),
-		result:       make(map[string]interface{}),
+		result:       make(map[string]Accumulator),
 		logger:       logger.GetLogger("Transform"),
 	}
 
@@ -91,10 +93,10 @@ func (t *Transform) IsSelectCard(ctx Context, c *trello.Card) bool {
 	return true
 }
 
-func (t *Transform) GetAllResult() map[string]interface{} {
+func (t *Transform) GetAllResult() map[string]Accumulator {
 	return t.result
 }
 
-func (t *Transform) GetResult(key string) interface{} {
+func (t *Transform) GetResult(key string) Accumulator {
 	return t.result[key]
 }

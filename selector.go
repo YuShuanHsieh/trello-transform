@@ -12,8 +12,11 @@ func ByListNames(names ...string) Seletor {
 		m[name] = struct{}{}
 	}
 	return func(ctx Context, c *trello.Card) bool {
-		if _, ok := m[c.Name]; ok {
-			return true
+		list, ok := ctx.Lists[c.IDList]
+		if ok {
+			if _, ok := m[list.Name]; ok {
+				return true
+			}
 		}
 		return false
 	}

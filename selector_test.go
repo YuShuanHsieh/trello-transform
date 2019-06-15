@@ -54,23 +54,25 @@ func TestCompareList(t *testing.T) {
 }
 
 func TestSelectByNames(t *testing.T) {
-	var ctx Context
+	ctx := Context{
+		Lists: map[string]trello.List{"id-1": trello.List{Name: "List1"}},
+	}
 	tests := []struct {
 		selector Seletor
 		card     trello.Card
 		expect   bool
 	}{
 		{
-			selector: ByListNames("Card1", "Card2", "Card3"),
+			selector: ByListNames("List1", "List2", "List3"),
 			card: trello.Card{
-				Name: "Card1",
+				IDList: "id-1",
 			},
 			expect: true,
 		},
 		{
-			selector: ByListNames("Card2", "Card3"),
+			selector: ByListNames("List2", "List3"),
 			card: trello.Card{
-				Name: "Card1",
+				IDList: "id-1",
 			},
 			expect: false,
 		},
