@@ -1,4 +1,4 @@
-package selector
+package transform
 
 import (
 	"github.com/YuShuanHsieh/trello-transform/models"
