@@ -3,6 +3,7 @@ package transform
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -18,11 +19,11 @@ type CardHeader struct {
 type markdownURLs []string
 
 func (m markdownURLs) String() string {
-	var urls string
+	var builder strings.Builder
 	for _, v := range m {
-		urls = fmt.Sprintf("%s%s\r\n", urls, v)
+		builder.WriteString("- " + v + "\r\n")
 	}
-	return urls
+	return builder.String()
 }
 
 // MarkdownURLTransformer extract url with markdowm style
@@ -47,11 +48,11 @@ func MarkdownURLTransformer(
 type countlabel map[string]int
 
 func (c countlabel) String() string {
-	var labels string
+	var builder strings.Builder
 	for k, v := range c {
-		labels = fmt.Sprintf("%s %s:%d", labels, k, v)
+		builder.WriteString(k + ":" + strconv.Itoa(v) + "\r\n")
 	}
-	return labels
+	return builder.String()
 }
 
 // CountLabelsTransformer Count label numbers for all cards.
@@ -77,11 +78,11 @@ func CountLabelsTransformer(
 type headers []CardHeader
 
 func (h headers) String() string {
-	var heads string
+	var builder strings.Builder
 	for _, v := range h {
-		heads = fmt.Sprintf("%s%s %s\r\n", heads, v.Date, v.Title)
+		builder.WriteString("- " + v.Date + " " + v.Title + "\r\n")
 	}
-	return heads
+	return builder.String()
 }
 
 // CardHeaderTransformer Generate a short sentence with card's title and date.

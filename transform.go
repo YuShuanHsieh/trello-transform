@@ -2,7 +2,6 @@ package transform
 
 import (
 	"encoding/json"
-	"log"
 
 	"github.com/YuShuanHsieh/trello-transform/logger"
 	"github.com/YuShuanHsieh/trello-transform/trello"
@@ -46,7 +45,6 @@ func New(rawData []byte) *Transform {
 
 	err := json.Unmarshal(rawData, &trans.table)
 	if err != nil {
-		log.Println(err.Error())
 		return nil
 	}
 	for _, v := range trans.table.Labels {
