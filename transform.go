@@ -1,100 +1,147 @@
 package transform
 
 import (
-	"encoding/json"
+	"fmt"
+	"strings"
+	"sync"
 
-	"github.com/YuShuanHsieh/trello-transform/logger"
-	"github.com/YuShuanHsieh/trello-transform/trello"
+	"github.com/pkg/errors"
+
+	"github.com/adlio/trello"
+	"go.uber.org/zap"
 )
 
-// Seletor is function for filtering a card
-type Seletor func(Context, *trello.Card) bool
+type SelectFunc func(*trello.Card) bool
 
-// Accumulator
-type Accumulator interface {
-	String() string
+type TransformFunc func(cards []*trello.Card) (key, result string, err error)
+
+type results struct {
+	m   map[string]string
+	mux sync.Mutex
 }
-
-type Transformer func(Context, Accumulator, *trello.Card) (Accumulator, error)
 
 type Transform struct {
-	table        trello.Table
-	ctx          Context
-	transformers map[string]Transformer
-	selectors    []Seletor
-	result       map[string]Accumulator
+	client        *trello.Client
+	trelloKey     string
+	trelloToken   string
+	trelloBoardID string
 
-	logger logger.Logger
+	board          trello.Board
+	transformFuncs []TransformFunc
+	selectFuncs    []SelectFunc
+	result         results
+
+	logger *zap.Logger
 }
 
-type Context struct {
-	Labels map[string]trello.Label
-	Lists  map[string]trello.List
-}
-
-func New(rawData []byte) *Transform {
-	trans := Transform{
-		ctx: Context{
-			Lists:  make(map[string]trello.List),
-			Labels: make(map[string]trello.Label),
-		},
-		transformers: make(map[string]Transformer),
-		result:       make(map[string]Accumulator),
-		logger:       logger.GetLogger("Transform"),
+func New(logger *zap.Logger, key, token, id string) *Transform {
+	return &Transform{
+		client:        trello.NewClient(key, token),
+		trelloKey:     key,
+		trelloToken:   token,
+		trelloBoardID: id,
+		result:        results{m: make(map[string]string)},
+		logger:        logger.With(zap.String("service", "transform")),
 	}
 
-	err := json.Unmarshal(rawData, &trans.table)
+}
+
+func (t *Transform) AddSelect(s SelectFunc) {
+	t.selectFuncs = append(t.selectFuncs, s)
+}
+
+func (t *Transform) AddTransformFunc(s TransformFunc) {
+	t.transformFuncs = append(t.transformFuncs, s)
+}
+
+func (t *Transform) Exec() error {
+	cards, err := t.getCards()
 	if err != nil {
-		return nil
+		return err
 	}
-	for _, v := range trans.table.Labels {
-		trans.ctx.Labels[v.ID] = v
+	if len(t.selectFuncs) > 0 {
+		cards = t.selectCards(cards)
 	}
-	for _, v := range trans.table.Lists {
-		trans.ctx.Lists[v.ID] = v
-	}
-	return &trans
-}
 
-func (t *Transform) Select(s Seletor) {
-	if s != nil {
-		t.selectors = append(t.selectors, s)
-	}
-}
+	var group sync.WaitGroup
+	group.Add(len(t.transformFuncs))
 
-func (t *Transform) Use(key string, fn Transformer) {
-	t.transformers[key] = fn
-}
-
-func (t *Transform) Exec() {
-	skipSeletors := len(t.selectors) == 0
-	for _, card := range t.table.Cards {
-		if !skipSeletors && !t.IsSelectCard(t.ctx, &card) {
-			continue
-		}
-		for key, trans := range t.transformers {
-			acc, err := trans(t.ctx, t.result[key], &card)
+	for _, fn := range t.transformFuncs {
+		go func(cards []*trello.Card, transFn TransformFunc) {
+			key, result, err := transFn(cards)
 			if err != nil {
-				t.logger.Error(err)
+				t.logger.Error("failed to transform", zap.String("transform-func", key))
 			}
-			t.result[key] = acc
+			t.result.mux.Lock()
+			t.result.m[key] = result
+			t.result.mux.Unlock()
+			group.Done()
+		}(cards, fn)
+	}
+
+	group.Wait()
+	t.printResult()
+
+	return nil
+}
+
+func (t *Transform) printResult() {
+	var builder strings.Builder
+	for k, v := range t.result.m {
+		builder.WriteString(fmt.Sprintf("[%s]\r\n%s\r\n", strings.ToUpper(k), v))
+	}
+	fmt.Println(builder.String())
+}
+
+func (t *Transform) selectCards(cards []*trello.Card) []*trello.Card {
+	selectedCards := make([]*trello.Card, 0, len(cards)/2)
+
+	for i, _ := range cards {
+		var isSelected bool
+		for _, fn := range t.selectFuncs {
+			if fn(cards[i]) {
+				isSelected = true
+				break
+			}
+		}
+		if isSelected {
+			selectedCards = append(selectedCards, cards[i])
 		}
 	}
+
+	t.logger.Debug("selected cards", zap.Int("card-number", len(selectedCards)))
+	return selectedCards
 }
 
-func (t *Transform) IsSelectCard(ctx Context, c *trello.Card) bool {
-	for _, s := range t.selectors {
-		if !s(ctx, c) {
-			return false
+func (t *Transform) getCards() ([]*trello.Card, error) {
+	board, err := t.client.GetBoard(t.trelloBoardID, trello.Defaults())
+	if err != nil {
+		return nil, errors.Errorf("failed to get board %s: %v", t.trelloBoardID, err)
+	}
+
+	cards, err := board.GetCards(trello.Defaults())
+	if err != nil {
+		return nil, errors.Errorf("failed to get cards: %v", err)
+	}
+
+	t.logger.Debug("fetched cards from trello api", zap.Int("card-number", len(cards)))
+
+	lists, err := board.GetLists(trello.Defaults())
+	if err != nil {
+		return nil, errors.Errorf("failed to get lists: %v", err)
+	}
+
+	listm := make(map[string]*trello.List)
+
+	for i := range lists {
+		listm[lists[i].ID] = lists[i]
+	}
+
+	for i, card := range cards {
+		_, ok := listm[card.IDList]
+		if ok {
+			cards[i].List = listm[card.IDList]
 		}
 	}
-	return true
-}
-
-func (t *Transform) GetAllResult() map[string]Accumulator {
-	return t.result
-}
-
-func (t *Transform) GetResult(key string) Accumulator {
-	return t.result[key]
+	return cards, nil
 }

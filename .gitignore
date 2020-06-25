@@ -3,3 +3,4 @@ trello.json
 */build
 .vscode/
 *.json
+.idea

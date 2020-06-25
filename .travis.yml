@@ -7,7 +7,6 @@ install:
 
 script:
 - ./pre-commit
-- go test ./...
 
 notifications:
   email: false
